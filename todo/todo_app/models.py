@@ -33,7 +33,7 @@ class TodoTask(models.Model):
     user = models.ForeignKey(User,related_name="taskuser",on_delete = models.CASCADE)
     task_name = models.CharField(max_length=155)
     task_description = models.TextField(max_length=400)
-    task_category = models.ForeignKey(TodoCategory,related_name="taskcategory",on_delete=models.SET_NULL)
+    task_category = models.ForeignKey(TodoCategory,related_name="taskcategory",on_delete=models.DO_NOTHING)
     priority = models.CharField(max_length=2, choices=PRIORITY_CHOICES, default='P1')
     task_status = models.CharField(max_length=15, choices=TASK_STATUS_CHOICES, default='Open')
     starred = models.BooleanField(default=False)
@@ -57,7 +57,7 @@ class TodoSubTask(models.Model):
         ('Completed', 'Completed'),
     ]
     
-    task = models.ForeignKey(TodoTask, related_name="subtask", on_delete = models.CASCADE)
+    task = models.ForeignKey(TodoTask, related_name="subtasks", on_delete = models.CASCADE)
     subtask_name = models.CharField(max_length=155)
     subtask_description = models.TextField(max_length=400)
     subtask_status = models.CharField(max_length=15, choices=TASK_STATUS_CHOICES, default='Open')

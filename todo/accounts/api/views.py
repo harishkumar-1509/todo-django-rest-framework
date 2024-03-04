@@ -87,7 +87,7 @@ class UserProfileView(APIView):
                 }
         return Response(data = data, status=status.HTTP_200_OK)
 
-class UserChangePasswordView():
+class UserChangePasswordView(APIView):
     renderer_classes = [UserRenderer]
     permission_classes = [IsAuthenticated]
     
