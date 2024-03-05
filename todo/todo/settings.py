@@ -141,6 +141,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Add the below line to implement the custom user model ( make sure you run the migrations only after creating this )
 AUTH_USER_MODEL = 'accounts.User'
 
+# Email Configuration
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_USE_TLS = False
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -190,6 +199,9 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainSlidingSerializer",
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
+
+# The password reset token generated token will be valid for only 15 mins ( 900 secs ).
+PASSWORD_RESET_TIMEOUT = 900
 
 # Added below to support the urls for cors (It can be React.js port or anything else) ( Change the URL accordingly )
 CORS_ALLOWED_ORIGINS = [

@@ -120,7 +120,26 @@ class SendPasswordResetEmailView(APIView):
                 }
             return Response(data = data, status=status.HTTP_200_OK)
         data = {
-                'msg': 'Something went wrong while sendind the email, please try after sometime!', 
+                'msg': 'Something went wrong while sending the email, please try after sometime!', 
+                'value':serializer.errors,
+                'token': None
+                }
+        return Response(data = data, status=status.HTTP_400_BAD_REQUEST)
+
+class UserPasswordResetView(APIView):
+    renderer_classes = [UserRenderer]
+    
+    def post(self, request, uid, token):
+        serializer = UserPasswordResetSerializer(data=request.data, context={'uid':uid,'token':token})
+        if serializer.is_valid():
+            data = {
+                'msg': 'Password reset Successfully!', 
+                'value':None,
+                'token': None
+                }
+            return Response(data = data, status=status.HTTP_200_OK)
+        data = {
+                'msg': 'Something went wrong while reseting the password!', 
                 'value':serializer.errors,
                 'token': None
                 }
