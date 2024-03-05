@@ -8,4 +8,5 @@ urlpatterns = [
     path('subtasks/', CreateSubTask.as_view(), name='subtask-create'),
     # path('subtasks/<int:pk>/', TodoSubTaskDetailView.as_view(), name='subtask-detail'),
     path('get-pending-tasks/', PendingTasksView.as_view(), name='get-pending-tasks'),
+    path('get-specific-task/<int:pk>', RetrieveUpdateDeleteTaskView.as_view(), name='get-specific-task'),
 ]

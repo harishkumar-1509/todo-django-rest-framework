@@ -1,5 +1,6 @@
 from django.db import models
 from accounts.models import User
+from constants import *
 
 # Create your models here.
 class TodoCategory(models.Model):
@@ -17,18 +18,18 @@ class TodoCategory(models.Model):
         verbose_name_plural = "categories"
 
 class TodoTask(models.Model):
-    PRIORITY_CHOICES = [
-        ('P1', 'P1'),
-        ('P2', 'P2'),
-        ('P3', 'P3'),
-        ('P4', 'P4'),
-    ]
+    # PRIORITY_CHOICES = [
+    #     ('P1', 'P1'),
+    #     ('P2', 'P2'),
+    #     ('P3', 'P3'),
+    #     ('P4', 'P4'),
+    # ]
     
-    TASK_STATUS_CHOICES = [
-        ('Open', 'Open'),
-        ('In Progress', 'In Progress'),
-        ('Completed', 'Completed'),
-    ]
+    # TASK_STATUS_CHOICES = [
+    #     ('Open', 'Open'),
+    #     ('In Progress', 'In Progress'),
+    #     ('Completed', 'Completed'),
+    # ]
 
     user = models.ForeignKey(User,related_name="taskuser",on_delete = models.CASCADE)
     task_name = models.CharField(max_length=155)
@@ -51,11 +52,11 @@ class TodoTask(models.Model):
         verbose_name_plural = "todo tasks"
 
 class TodoSubTask(models.Model):
-    TASK_STATUS_CHOICES = [
-        ('Open', 'Open'),
-        ('In Progress', 'In Progress'),
-        ('Completed', 'Completed'),
-    ]
+    # TASK_STATUS_CHOICES = [
+    #     ('Open', 'Open'),
+    #     ('In Progress', 'In Progress'),
+    #     ('Completed', 'Completed'),
+    # ]
     
     task = models.ForeignKey(TodoTask, related_name="subtasks", on_delete = models.CASCADE)
     subtask_name = models.CharField(max_length=155)

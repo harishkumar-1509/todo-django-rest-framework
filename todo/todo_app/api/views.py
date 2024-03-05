@@ -1,4 +1,6 @@
 from rest_framework import generics
+from rest_framework.views import APIView
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from ..models import *
@@ -6,6 +8,8 @@ from .serializers import *
 from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Q
+from django.http import Http404
+from .pagination import *
 
 # API:1 -> Create and list a category/categories for the user
 # API:2 -> Create and list a tasks along with subtasks for the user
@@ -26,6 +30,7 @@ class CreateListTasksView(generics.ListCreateAPIView):
     model = TodoTask
     permission_classes = [IsAuthenticated]
     serializer_class = TodoTaskSerializer
+    pagination_class = TodoTaskListPagination
     
     def get_queryset(self):
         return TodoTask.objects.filter(user=self.request.user).order_by('-created_at')
@@ -43,6 +48,55 @@ class CreateListTasksView(generics.ListCreateAPIView):
         context['user'] = self.request.user
         return context
 
+class RetrieveUpdateDeleteTaskView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get_object(self, pk, request):
+        try:
+            return TodoTask.objects.get(pk=pk, user=request.user)
+        except TodoTask.DoesNotExist:
+            raise Http404("Todo task does not exist")
+               
+    def get(self,request,pk):
+        task = self.get_object(pk, request)
+        serializer = TodoTaskSerializer(task)
+        return Response(serializer.data)
+    
+    def put(self,request,pk):
+        task = self.get_object(pk, request)
+        serializer = TodoTaskSerializer(task, data=request.data)
+        task_status = request.data.get('task_status')
+        task_start_date = request.data.get('task_start_date')
+        task_end_date = request.data.get('task_end_data')
+        if serializer.is_valid():
+            sub_tasks = TodoSubTask.objects.filter(task=task)
+            """If the task has 1 or more sub tasks associated with it and the user wants to complete the task, 
+            then we need to check any of the sub tasks in the task has in progress or open status and deny the user to complete the main task if any."""
+            if task_status == "Completed":
+                if sub_tasks.count() > 0:
+                    for sub_task in sub_tasks:
+                        if sub_task.subtask_status == "Open" or sub_task.subtask_status == "In Progress":
+                            return Response({'msg': 'Cannot complete task because it has sub tasks that are not completed!'}, status=status.HTTP_400_BAD_REQUEST)
+            
+                # Check whether the user has given start date and end date , only if given they can close the task
+                if task_start_date is None:
+                    return Response({'msg': 'Task start date is required to end task!'}, status=status.HTTP_400_BAD_REQUEST)
+                
+                if task_end_date is None:
+                    return Response({'msg': 'Task end date is required to end task!'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            serializer.save()
+            return Response(serializer.data)
+            
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+    def delete(self,request,pk):
+        task = self.get_object(pk, request)
+        sub_tasks = TodoSubTask.objects.filter(task=task)
+        for sub_task in sub_tasks:
+            if sub_task.subtask_status == "In Progress":
+                return Response({'msg': 'Task cannot be deleted because it has a sub task in progress!'})
+        task.delete()
+        return Response({'msg': 'Task deleted successfully!'}, status=status.HTTP_204_NO_CONTENT)
 class CreateSubTask(generics.CreateAPIView):
     model = TodoSubTask
     permission_classes = [IsAuthenticated]
