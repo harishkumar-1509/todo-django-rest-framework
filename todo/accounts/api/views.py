@@ -6,6 +6,7 @@ from django.contrib.auth import authenticate
 from ..renderers import *
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 
 # Generate token manually
 def get_tokens_for_user(user):
@@ -74,6 +75,21 @@ class UserLoginView(APIView):
                 'token': None
                 }
         return Response(data = data, status=status.HTTP_200_OK)
+
+class RefreshTokenView(APIView):
+    def post(self, request):
+        refresh_token = request.data.get('refresh_token')
+        if not refresh_token:
+            return Response({'error': 'Refresh token is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            refresh_token = RefreshToken(refresh_token)
+            refresh_token.verify()
+            access_token = refresh_token.access_token
+            return Response({'access_token': str(access_token)}, status=status.HTTP_200_OK)
+        except InvalidToken:
+            return Response({'error': 'Invalid refresh token.'}, status=status.HTTP_401_UNAUTHORIZED)
+        except TokenError as e:
+            return Response({'error': f'Error refreshing token: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
 
 class UserProfileView(APIView):
     renderer_classes = [UserRenderer]
