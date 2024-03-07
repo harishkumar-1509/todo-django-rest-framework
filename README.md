@@ -1,4 +1,4 @@
-# Django REST Framework Project
+# Django REST Framework Project - Todo Manager: A Comprehensive Django REST API for Task Management
 
 ## Project Overview
 
