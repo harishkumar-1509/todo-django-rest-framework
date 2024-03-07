@@ -67,6 +67,13 @@ class RetrieveUpdateDeleteTaskView(APIView):
         task_status = request.data.get('task_status')
         task_start_date = request.data.get('task_start_date')
         task_end_date = request.data.get('task_end_date')
+        task_time_log = request.data.get('task_time_log')
+        
+        if len(task_time_log) is not 0:
+            valid_time_format = TodoUtils.validate_time_string(task_time_log)
+            if not valid_time_format:
+                return Response({'msg': 'Task time log is not valid please check the format or the values'}, status=status.HTTP_400_BAD_REQUEST)
+        
         if serializer.is_valid():
             sub_tasks = TodoSubTask.objects.filter(task=task)
             """If the task has 1 or more sub tasks associated with it and the user wants to complete the task, 
@@ -83,6 +90,13 @@ class RetrieveUpdateDeleteTaskView(APIView):
                 
                 if task_end_date is None:
                     return Response({'msg': 'Task end date is required to end task!'}, status=status.HTTP_400_BAD_REQUEST)
+                
+                if task_time_log is None or "":
+                    return Response({'msg': 'Task time log is required to end task!'}, status=status.HTTP_400_BAD_REQUEST)
+                
+                valid_time_format = TodoUtils.validate_time_string(task_time_log)
+                if not valid_time_format:
+                    return Response({'msg': 'Task time log is not valid please check the format or the values'}, status=status.HTTP_400_BAD_REQUEST)
             
             serializer.save()
             return Response(serializer.data)
@@ -165,12 +179,25 @@ class RetrieveUpdateDeleteSubTaskView(APIView):
         subtask_status = request.data.get('subtask_status')
         subtask_start_date = request.data.get('subtask_start_date')
         subtask_end_date = request.data.get('subtask_end_date')
+        task_time_log = request.data.get('subtask_time_log')
+        
+        if len(task_time_log) is not 0:
+            valid_time_format = TodoUtils.validate_time_string(task_time_log)
+            if not valid_time_format:
+                return Response({'msg': 'Task time log is not valid please check the format or the values'}, status=status.HTTP_400_BAD_REQUEST)
+            
         if serializer.is_valid():
             if subtask_status == "Completed":
                 if subtask_start_date is None:
                     return Response({'msg': 'Sub-Task start date is required to end task!'}, status=status.HTTP_400_BAD_REQUEST)
                 if subtask_end_date is None:
                     return Response({'msg': 'Sub-Task end date is required to end task!'}, status=status.HTTP_400_BAD_REQUEST)
+                if task_time_log is None or "":
+                    return Response({'msg': 'Task time log is required to end task!'}, status=status.HTTP_400_BAD_REQUEST)
+                
+                valid_time_format = TodoUtils.validate_time_string(task_time_log)
+                if not valid_time_format:
+                    return Response({'msg': 'Task time log is not valid please check the format or the values'}, status=status.HTTP_400_BAD_REQUEST)
             serializer.save()
             return Response(serializer.data)
             
