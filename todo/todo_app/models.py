@@ -40,6 +40,7 @@ class TodoTask(models.Model):
     starred = models.BooleanField(default=False)
     task_start_date = models.DateTimeField(null=True)
     task_end_date = models.DateTimeField(null=True)
+    task_time_log = models.CharField(max_length=25, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -64,6 +65,7 @@ class TodoSubTask(models.Model):
     subtask_status = models.CharField(max_length=15, choices=TASK_STATUS_CHOICES, default='Open')
     subtask_start_date = models.DateTimeField(null=True)
     subtask_end_date = models.DateTimeField(null=True)
+    subtask_time_log = models.CharField(max_length=25, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

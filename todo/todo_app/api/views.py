@@ -66,7 +66,7 @@ class RetrieveUpdateDeleteTaskView(APIView):
         serializer = TodoTaskSerializer(task, data=request.data)
         task_status = request.data.get('task_status')
         task_start_date = request.data.get('task_start_date')
-        task_end_date = request.data.get('task_end_data')
+        task_end_date = request.data.get('task_end_date')
         if serializer.is_valid():
             sub_tasks = TodoSubTask.objects.filter(task=task)
             """If the task has 1 or more sub tasks associated with it and the user wants to complete the task, 
@@ -146,6 +146,42 @@ class PendingTasksView(generics.ListAPIView):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
+class RetrieveUpdateDeleteSubTaskView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get_object(self, pk, request):
+        try:
+            return TodoSubTask.objects.get(pk=pk)
+        except TodoSubTask.DoesNotExist:
+            raise Http404("Sub task does not exist")
+    def get(self, request,pk):
+        sub_task = self.get_object(pk, request)
+        serializer = TodoSubTaskSerializer(sub_task)
+        return Response(serializer.data)
+    
+    def put(self, request,pk):
+        sub_task = self.get_object(pk, request)
+        serializer = TodoSubTaskSerializer(sub_task, data=request.data)
+        subtask_status = request.data.get('subtask_status')
+        subtask_start_date = request.data.get('subtask_start_date')
+        subtask_end_date = request.data.get('subtask_end_date')
+        if serializer.is_valid():
+            if subtask_status == "Completed":
+                if subtask_start_date is None:
+                    return Response({'msg': 'Sub-Task start date is required to end task!'}, status=status.HTTP_400_BAD_REQUEST)
+                if subtask_end_date is None:
+                    return Response({'msg': 'Sub-Task end date is required to end task!'}, status=status.HTTP_400_BAD_REQUEST)
+            serializer.save()
+            return Response(serializer.data)
+            
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request,pk):
+        sub_task = self.get_object(pk, request)
+        if sub_task.subtask_status == "In Progress":
+            return Response({'msg': 'In Progress Sub-Task cannot be deleted!'}, status=status.HTTP_400_BAD_REQUEST)
+        sub_task.delete()
+        return Response({'msg': 'Sub-Task deleted successfully!'}, status=status.HTTP_204_NO_CONTENT)
     
         
         
